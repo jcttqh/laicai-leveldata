@@ -716,19 +716,12 @@ function bindModelPanel() {
 function rebuildMapFilterOptions() {
   const sel = document.getElementById('heatMapFilter');
   if (!sel) return;
-  const stat = countHeatMapIds();
-  // 只保留归属当前地图、且数据里确实出现过的 map_id
+  // 档位直接取自静态配置（当前 3D 地图归属的 map_id），不依赖扫描海量点数据。
+  // 这样 iOS/安卓表现一致，且不受大数组加载时机影响。
   const known = Object.keys(HEAT_MAP_NAMES).map(Number);
-  const ids = Object.keys(stat).map(Number)
+  const ids = known
     .filter((id) => HEAT_MAP_TO_LEVEL[id] === currentMapKey)
-    .sort((a, b) => {
-      const ka = known.indexOf(a), kb = known.indexOf(b);
-      if (ka >= 0 && kb >= 0) return ka - kb;
-      if (ka >= 0) return -1;
-      if (kb >= 0) return 1;
-      return a - b;
-    });
-  const total = ids.reduce((s, id) => s + (stat[id] || 0), 0);
+    .sort((a, b) => known.indexOf(a) - known.indexOf(b));
 
   sel.innerHTML = '';
   const optAll = document.createElement('option');
