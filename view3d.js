@@ -387,8 +387,8 @@ const POINT_CATEGORIES = BEHAVIOR_CATEGORIES.concat(OTHER_CATEGORIES);
 const behaviorState = {};
 POINT_CATEGORIES.forEach((c) => {
   behaviorState[c.key] = {
-    // 面向玩家的默认：全部玩家行为分类默认打开（点云展示）
-    group: null, points3d: [], visible: true, color: c.color, built: false,
+    // 面向玩家的默认：全部玩家行为分类默认关闭，由玩家自行勾选
+    group: null, points3d: [], visible: false, color: c.color, built: false,
   };
 });
 // 取某类别的原始数据数组（玩家行为取 HEAT_DATA，其他数据取 OTHER_DATA）
