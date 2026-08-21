@@ -2942,6 +2942,10 @@ function buildDotsGroup(raw, color, outPoints) {
   }
   inst.instanceMatrix.needsUpdate = true;
   inst.renderOrder = 990;
+  // InstancedMesh 默认用「基础球几何在原点的包围球」做视锥剔除，不会自动覆盖所有实例；
+  // 当相机聚焦到偏离 UE 原点的数据簇、且屏幕视锥较窄（iOS 竖屏）时，会整组被误剔除导致
+  // 一个点都不显示（安卓因宽高比不同恰好未被剔除）。这里直接关闭剔除，确保始终渲染。
+  inst.frustumCulled = false;
 
   const group = new THREE.Group();
   group.add(inst);
