@@ -82,7 +82,7 @@ function applyModelXform() {
 // ===== 3D 模型显示状态（显隐 / 透明度）=====
 // 与 MODEL_XFORMS（按地图独立的位姿）不同，这两项是全局视图设置，切换地图后保持。
 let modelVisible = true;    // 模型是否显示
-let modelOpacity = 1;       // 模型不透明度 0~1（<1 时自动开启材质透明）
+let modelOpacity = 0.5;     // 模型不透明度 0~1（默认 0.5，便于透过模型看数据；<1 时自动开启材质透明）
 
 // 应用模型显隐与透明度。模型加载完成、以及面板操作时都会调用。
 function applyModelDisplay() {
@@ -273,14 +273,12 @@ const MAP_META = {
 const HEAT_MAP_NAMES = {
   39: '新秀电子城', 35: '高手电子城', 36: '精英电子城',
   40: '高手钢铁厂', 41: '精英钢铁厂', 42: '大师钢铁厂',
-  48: '怪物教学顺风耳', 49: '怪物教学小跟班',
 };
 // 各 map_id 归属哪张 3D 地图（地图筛选下拉只列出当前地图的档位）
-//   电子城：39 新秀 / 35 高手 / 36 精英 / 48 怪物教学顺风耳 / 49 怪物教学小跟班
+//   电子城：39 新秀 / 35 高手 / 36 精英
 //   钢铁厂：40 高手 / 41 精英 / 42 大师
 const HEAT_MAP_TO_LEVEL = {
   39: 'electronic', 35: 'electronic', 36: 'electronic',
-  48: 'electronic', 49: 'electronic',
   40: 'steel', 41: 'steel', 42: 'steel',
 };
 let heatMapFilter = 'all';   // 'all'（当前地图全部档位）或具体 map_id 数字
@@ -736,12 +734,12 @@ function rebuildMapFilterOptions() {
   sel.innerHTML = '';
   const optAll = document.createElement('option');
   optAll.value = 'all';
-  optAll.textContent = `全部（${total}）`;
+  optAll.textContent = '全部';
   sel.appendChild(optAll);
   ids.forEach((id) => {
     const opt = document.createElement('option');
     opt.value = String(id);
-    opt.textContent = `${id} ${HEAT_MAP_NAMES[id] || '未知关卡'}（${stat[id]}）`;
+    opt.textContent = `${HEAT_MAP_NAMES[id] || '未知关卡'}`;
     sel.appendChild(opt);
   });
 
