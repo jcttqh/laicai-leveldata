@@ -379,17 +379,16 @@ const BEHAVIOR_CATEGORIES = [
 // ===== 其他数据（与「玩家行为」同级的独立分组）=====
 // 数据源：otherdata.js -> window.OTHER_DATA[key] = [[x, y, z, mapId, tOffset], ...]
 // 结构与玩家行为点云完全一致，复用同一套散点 / 热力图 / 时间轴渲染机制。
-const OTHER_CATEGORIES = [
-  { key: 'snapshot', name: '一分钟快照', color: '#a29bfe' },
-];
+// ===== 其他数据分组已整体移除（不再展示一分钟快照 / 脱离卡死）=====
+const OTHER_CATEGORIES = [];
 // 所有「点云类」类别（玩家行为 + 其他数据），渲染 / 过滤 / 聚焦统一遍历此列表
 const POINT_CATEGORIES = BEHAVIOR_CATEGORIES.concat(OTHER_CATEGORIES);
 // 运行时状态：{ [key]: { group, points3d, visible, color, built } }
 const behaviorState = {};
 POINT_CATEGORIES.forEach((c) => {
   behaviorState[c.key] = {
-    // 面向玩家的默认：一分钟快照默认打开，其余默认关闭
-    group: null, points3d: [], visible: (c.key === 'snapshot'), color: c.color, built: false,
+    // 面向玩家的默认：全部玩家行为分类默认打开（点云展示）
+    group: null, points3d: [], visible: true, color: c.color, built: false,
   };
 });
 // 取某类别的原始数据数组（玩家行为取 HEAT_DATA，其他数据取 OTHER_DATA）
@@ -2563,7 +2562,7 @@ function heatColorRGB(t) {
 //   4) 点位坐标一律走 ueToLocal，与点云使用完全相同的映射（含左右镜像），
 //      保证两种显示方式的位置严格一致。
 //   5) 平面紧贴 2D 参考图上方并关闭深度测试，俯视时与小地图严格重合、不被建筑遮挡。
-let displayMode = 'heatmap';   // 'points' | 'heatmap'（玩家端默认热力图）
+let displayMode = 'points';   // 'points' | 'heatmap'（玩家端默认点云）
 let heatPlane = null;         // 承载热力图贴图的平面
 // 热力图的扩散范围（真实世界距离，cm）。按此值换算成像素半径，
 // 保证不同尺寸的地图扩散程度在物理上一致；不对外暴露为可调参数。
