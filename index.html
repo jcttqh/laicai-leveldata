@@ -7,8 +7,8 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#0b0f14" />
   <title>来财行动 · 关卡数据</title>
-  <link rel="stylesheet" href="style.css?v=h5-2" />
-  <link rel="stylesheet" href="mobile.css?v=h5-2" />
+  <link rel="stylesheet" href="style.css?v=h5-3" />
+  <link rel="stylesheet" href="mobile.css?v=h5-3" />
 </head>
 <body class="mobile">
   <div class="app">
@@ -34,10 +34,6 @@
 
       <!-- 悬浮操作：复位 / 视角切换 -->
       <div class="m-fabs">
-        <div class="m-proj" id="projSwitch">
-          <button class="view-tab active" data-proj="persp" id="tabPersp" title="透视（近大远小）">透视</button>
-          <button class="view-tab" data-proj="ortho" id="tabOrtho" title="正交俯视">俯视</button>
-        </div>
         <button class="m-fab" id="mBtnReset" title="复位视角">复位</button>
       </div>
 
@@ -46,16 +42,16 @@
         <div class="m-tips-title">操作说明</div>
         <div class="m-tips-line"><b>单指拖动</b> — 平移画面</div>
         <div class="m-tips-line"><b>双指捏合</b> — 放大 / 缩小</div>
-        <div class="m-tips-line">底部 <b>数据内容</b> 可上滑展开</div>
+        <div class="m-tips-line">点击底部 <b>数据内容</b> 展开</div>
         <button class="m-tips-close" id="mTipsClose">开始查看</button>
       </div>
 
       <!-- 数据内容底部抽屉（id/class 与 view3d.js 绑定保持一致） -->
       <div class="heatmap-panel m-sheet collapsed" id="heatmapPanel">
         <div class="m-sheet-handle" id="mSheetHandle">
-          <span class="m-sheet-grip"></span>
+          <span class="m-sheet-ico">☰</span>
           <span class="m-sheet-title">数据内容</span>
-          <span class="m-sheet-caret">▴</span>
+          <span class="m-sheet-toggle"><span class="m-sheet-caret">▴</span></span>
         </div>
         <div class="m-sheet-body">
           <div class="heatmap-panel-row">
@@ -105,21 +101,21 @@
 
           <!-- 数据分类树 -->
           <div class="data-tree" id="dataTree">
-            <div class="data-group" data-group="scene">
+            <div class="data-group collapsed" data-group="scene">
               <div class="data-group-head">
                 <span class="data-caret">▾</span>
                 <span class="data-group-name">场景点位</span>
               </div>
               <div class="data-group-body" id="sceneList"></div>
             </div>
-            <div class="data-group" data-group="behavior">
+            <div class="data-group collapsed" data-group="behavior">
               <div class="data-group-head">
                 <span class="data-caret">▾</span>
                 <span class="data-group-name">玩家行为</span>
               </div>
               <div class="data-group-body" id="behaviorList"></div>
             </div>
-            <div class="data-group" data-group="other">
+            <div class="data-group collapsed" data-group="other">
               <div class="data-group-head">
                 <span class="data-caret">▾</span>
                 <span class="data-group-name">其他数据</span>
@@ -140,10 +136,10 @@
     }
   }
   </script>
-  <script src="mobile.js?v=h5-2"></script>
-  <script src="heatdata.js?v=h5-2"></script>
-  <script src="scenepoints.js?v=h5-2"></script>
-  <script src="snapshotdata.js?v=h5-2"></script>
-  <script type="module" src="view3d.js?v=h5-2"></script>
+  <script src="mobile.js?v=h5-3"></script>
+  <script src="heatdata.js?v=h5-3"></script>
+  <script src="scenepoints.js?v=h5-3"></script>
+  <script src="snapshotdata.js?v=h5-3"></script>
+  <script type="module" src="view3d.js?v=h5-3"></script>
 </body>
 </html>

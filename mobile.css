@@ -144,50 +144,52 @@ body.mobile .heatmap-panel.m-sheet {
   z-index: 28;
 }
 body.mobile .heatmap-panel.m-sheet.collapsed {
-  transform: translateY(calc(100% - 48px - env(safe-area-inset-bottom, 0px)));
-}
-/* 拖动过程中关闭过渡，做到 1:1 跟手 */
-body.mobile .heatmap-panel.m-sheet.m-dragging {
-  transition: none;
+  transform: translateY(calc(100% - 52px - env(safe-area-inset-bottom, 0px)));
 }
 .m-sheet-handle {
-  height: 48px;
+  height: 52px;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 18px;
+  padding: 0 16px;
   cursor: pointer;
-  touch-action: none;
   user-select: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
-.m-sheet-grip {
-  width: 36px;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--text-dim);
-  opacity: 0.5;
-  position: absolute;
-  left: 50%;
-  top: 8px;
-  transform: translateX(-50%);
+.m-sheet-handle:active { background: rgba(245, 197, 66, 0.08); }
+.m-sheet-ico {
+  color: var(--accent);
+  font-size: 16px;
+  line-height: 1;
 }
 .m-sheet-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--text);
   letter-spacing: 1px;
 }
-.m-sheet-caret {
+.m-sheet-toggle {
   margin-left: auto;
-  color: var(--text-dim);
-  font-size: 16px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(245, 197, 66, 0.14);
+  border: 1px solid var(--accent);
+}
+.m-sheet-caret {
+  color: var(--accent);
+  font-size: 15px;
+  line-height: 1;
   transition: transform 0.28s ease;
 }
 .m-sheet.collapsed .m-sheet-caret { transform: rotate(180deg); }
 .m-sheet-body {
   padding: 4px 16px calc(18px + env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
-  max-height: calc(64vh - 48px);
+  max-height: calc(64vh - 52px);
   display: flex;
   flex-direction: column;
   gap: 10px;

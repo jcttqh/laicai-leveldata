@@ -196,7 +196,7 @@ const SCENE_CATEGORIES = [
 // 运行时状态：{ [key]: { group, visible, markers[] } }
 const sceneState = {};
 SCENE_CATEGORIES.forEach((c) => {
-  sceneState[c.key] = { group: null, visible: false, markers: [] };
+  sceneState[c.key] = { group: null, visible: true, markers: [] };
 });
 // 当前应显示哪个难度档位的场景点位：
 //   地图筛选选了具体 map_id → 用它；选「全部」→ 用当前地图的第一个档位
@@ -371,13 +371,12 @@ let playerDotTexture = null;
 //   chest_monster para3 ∈ 1040701~705 / 1040801~805 / 1040901~905 / 1041001~005（怪物宝箱）
 //   chest_normal  其余 id（常规宝箱）
 const BEHAVIOR_CATEGORIES = [
-  { key: 'chest_player',  name: '开启玩家宝箱', color: '#ffd166' },
-  { key: 'chest_monster', name: '开启怪物宝箱', color: '#f97316' },
-  { key: 'chest_normal',  name: '开启常规宝箱', color: '#4dd2ff' },
-  { key: 'near_death',    name: '玩家濒死',     color: '#ff9f43' },
-  { key: 'rescue',        name: '救援行为',     color: '#a55eea' },
-  { key: 'death',         name: '玩家死亡',     color: '#ff3b3b' },
-  { key: 'kill',          name: '造成击杀',     color: '#ff5edb' },
+  { key: 'chest_player',  name: '玩家宝箱点位', color: '#ffd166' },
+  { key: 'chest_monster', name: '怪物宝箱点位', color: '#f97316' },
+  { key: 'chest_normal',  name: '室外宝箱点位', color: '#4dd2ff' },
+  { key: 'near_death',    name: '玩家濒死点位', color: '#ff9f43' },
+  { key: 'rescue',        name: '救援行为点位', color: '#a55eea' },
+  { key: 'death',         name: '玩家死亡点位', color: '#ff3b3b' },
 ];
 // ===== 其他数据（与「玩家行为」同级的独立分组）=====
 // 数据源：otherdata.js -> window.OTHER_DATA[key] = [[x, y, z, mapId, tOffset], ...]
