@@ -7,8 +7,8 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#0b0f14" />
   <title>来财行动 · 关卡数据</title>
-  <link rel="stylesheet" href="style.css?v=h5-1" />
-  <link rel="stylesheet" href="mobile.css?v=h5-1" />
+  <link rel="stylesheet" href="style.css?v=h5-2" />
+  <link rel="stylesheet" href="mobile.css?v=h5-2" />
 </head>
 <body class="mobile">
   <div class="app">
@@ -44,9 +44,9 @@
       <!-- 首次操作提示 -->
       <div class="m-tips" id="mTips">
         <div class="m-tips-title">操作说明</div>
-        <div class="m-tips-line"><b>单指拖动</b> — 旋转视角</div>
+        <div class="m-tips-line"><b>单指拖动</b> — 平移画面</div>
         <div class="m-tips-line"><b>双指捏合</b> — 放大 / 缩小</div>
-        <div class="m-tips-line"><b>双指拖动</b> — 平移画面</div>
+        <div class="m-tips-line">底部 <b>数据内容</b> 可上滑展开</div>
         <button class="m-tips-close" id="mTipsClose">开始查看</button>
       </div>
 
@@ -72,8 +72,8 @@
           <div class="heatmap-panel-row">
             <span class="heatmap-panel-label">显示方式</span>
             <div class="mode-switch" id="dataModeSwitch">
-              <button class="mode-btn active" data-mode="points">点云</button>
-              <button class="mode-btn" data-mode="heatmap">热力图</button>
+              <button class="mode-btn" data-mode="points">点云</button>
+              <button class="mode-btn active" data-mode="heatmap">热力图</button>
             </div>
           </div>
 
@@ -82,8 +82,8 @@
           <div class="heatmap-panel-row">
             <span class="heatmap-panel-label">按照时间显示</span>
             <div class="mode-switch" id="timeEnableSwitch">
-              <button class="mode-btn active" data-on="1">是</button>
-              <button class="mode-btn" data-on="0">否</button>
+              <button class="mode-btn" data-on="1">是</button>
+              <button class="mode-btn active" data-on="0">否</button>
             </div>
           </div>
           <div class="heatmap-panel-row" id="timeUnitRow">
@@ -140,10 +140,10 @@
     }
   }
   </script>
-  <script src="mobile.js?v=h5-1"></script>
-  <script src="heatdata.js?v=h5-1"></script>
-  <script src="scenepoints.js?v=h5-1"></script>
-  <script src="snapshotdata.js?v=h5-1"></script>
-  <script type="module" src="view3d.js?v=h5-1"></script>
+  <script src="mobile.js?v=h5-2"></script>
+  <script src="heatdata.js?v=h5-2"></script>
+  <script src="scenepoints.js?v=h5-2"></script>
+  <script src="snapshotdata.js?v=h5-2"></script>
+  <script type="module" src="view3d.js?v=h5-2"></script>
 </body>
 </html>

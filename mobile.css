@@ -146,6 +146,10 @@ body.mobile .heatmap-panel.m-sheet {
 body.mobile .heatmap-panel.m-sheet.collapsed {
   transform: translateY(calc(100% - 48px - env(safe-area-inset-bottom, 0px)));
 }
+/* 拖动过程中关闭过渡，做到 1:1 跟手 */
+body.mobile .heatmap-panel.m-sheet.m-dragging {
+  transition: none;
+}
 .m-sheet-handle {
   height: 48px;
   display: flex;
@@ -153,6 +157,8 @@ body.mobile .heatmap-panel.m-sheet.collapsed {
   gap: 10px;
   padding: 0 18px;
   cursor: pointer;
+  touch-action: none;
+  user-select: none;
 }
 .m-sheet-grip {
   width: 36px;

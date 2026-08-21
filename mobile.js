@@ -63,13 +63,65 @@
     });
   }
 
-  // ---- 数据内容底部抽屉 ----
+  // ---- 数据内容底部抽屉（可拖拽滑动 + 轻点切换）----
   var sheet = document.getElementById('heatmapPanel');
   var handle = document.getElementById('mSheetHandle');
   if (sheet && handle) {
-    handle.addEventListener('click', function () {
-      sheet.classList.toggle('collapsed');
-    });
+    var dragging = false;
+    var startY = 0;      // 手指起始 Y
+    var baseY = 0;       // 拖动起始时抽屉的 translateY
+    var curY = 0;        // 当前 translateY
+    var moved = 0;       // 累计位移（判断是否为轻点）
+
+    // 收起状态下抽屉下移的距离 = 抽屉高度 - 手柄高度
+    function collapsedOffset() {
+      return Math.max(0, sheet.offsetHeight - handle.offsetHeight);
+    }
+
+    function onDown(clientY) {
+      dragging = true;
+      moved = 0;
+      startY = clientY;
+      baseY = sheet.classList.contains('collapsed') ? collapsedOffset() : 0;
+      curY = baseY;
+      sheet.classList.add('m-dragging'); // 关闭 transition，拖动跟手
+    }
+    function onMove(clientY) {
+      if (!dragging) return;
+      var dy = clientY - startY;
+      moved = Math.max(moved, Math.abs(dy));
+      curY = Math.min(collapsedOffset(), Math.max(0, baseY + dy));
+      sheet.style.transform = 'translateY(' + curY + 'px)';
+    }
+    function onUp() {
+      if (!dragging) return;
+      dragging = false;
+      sheet.classList.remove('m-dragging');
+      sheet.style.transform = '';        // 交还给 CSS class 控制
+      var off = collapsedOffset();
+      if (moved < 8) {
+        // 轻点：直接切换
+        sheet.classList.toggle('collapsed');
+      } else {
+        // 拖动：按当前位置过半吸附
+        sheet.classList.toggle('collapsed', curY > off / 2);
+      }
+    }
+
+    // 触摸
+    handle.addEventListener('touchstart', function (e) {
+      onDown(e.touches[0].clientY); e.preventDefault();
+    }, { passive: false });
+    handle.addEventListener('touchmove', function (e) {
+      onMove(e.touches[0].clientY); e.preventDefault();
+    }, { passive: false });
+    handle.addEventListener('touchend', onUp);
+    handle.addEventListener('touchcancel', onUp);
+
+    // 鼠标（桌面调试兼容）
+    handle.addEventListener('mousedown', function (e) { onDown(e.clientY); });
+    window.addEventListener('mousemove', function (e) { if (dragging) onMove(e.clientY); });
+    window.addEventListener('mouseup', onUp);
   }
 
   // ---- 首次操作提示 ----

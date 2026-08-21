@@ -288,7 +288,7 @@ let heatMapFilter = 'all';   // 'all'（当前地图全部档位）或具体 map
 // ===== 数据时间轴（按事件时间 dtEventTime 过滤）=====
 // 数据点第 5 个字段 p[4] = 「相对 window.HEAT_TIME_BASE 的秒偏移」（由 csv2heatdata.py 写入）；
 // window.HEAT_TIME_BASE 为该数据集最早事件的 Unix 时间戳（秒）。缺字段或 <0 视为未知时间。
-let timeFilterEnabled = true;   // 「按照时间显示」，默认「是」（与设计稿一致）
+let timeFilterEnabled = false;  // 「按照时间显示」，默认「否」（玩家端默认直接显示全部数据）
 let timeUnitSec = 43200;        // 时间单位（秒）：21600=6h / 43200=12h / 86400=1天
 let timeWindowStart = 0;        // 当前时间窗起点（相对 base 的秒偏移）
 let dataTimeMin = 0;            // 数据集最早事件（相对偏移）
@@ -391,7 +391,8 @@ const POINT_CATEGORIES = BEHAVIOR_CATEGORIES.concat(OTHER_CATEGORIES);
 const behaviorState = {};
 POINT_CATEGORIES.forEach((c) => {
   behaviorState[c.key] = {
-    group: null, points3d: [], visible: false, color: c.color, built: false,
+    // 面向玩家的默认：一分钟快照默认打开，其余默认关闭
+    group: null, points3d: [], visible: (c.key === 'snapshot'), color: c.color, built: false,
   };
 });
 // 取某类别的原始数据数组（玩家行为取 HEAT_DATA，其他数据取 OTHER_DATA）
@@ -1290,18 +1291,23 @@ function bindControls() {
   bindTouchControls();
 }
 
-// ===== 移动端触摸手势 =====
-// 单指拖动：旋转视角（yaw/pitch）
+// ===== 移动端触摸手势（面向玩家的简化操作）=====
+// 单指拖动：平移画面（沿相机右向/上向做屏幕空间平移）
 // 双指捏合：缩放（透视=沿视线 dolly，正交=改 orthoZoom）
-// 双指拖动：平移（沿相机右向/上向）
+// 【已去掉旋转视角】：玩家只需平移 + 缩放看数据，无需转动镜头
 function bindTouchControls() {
-  let mode = 0;            // 0 空闲 / 1 单指旋转 / 2 双指缩放平移
+  let mode = 0;            // 0 空闲 / 1 单指平移 / 2 双指缩放
   let lx = 0, ly = 0;      // 上一帧单指位置
   let lastDist = 0;        // 上一帧双指间距
-  let lmx = 0, lmy = 0;    // 上一帧双指中点
   const dist = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-  const midX = (a, b) => (a.clientX + b.clientX) / 2;
-  const midY = (a, b) => (a.clientY + b.clientY) / 2;
+
+  // 沿相机右向/上向平移（屏幕空间），dpx/dpy 为屏幕像素位移
+  const panBy = (dpx, dpy) => {
+    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
+    const up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+    camera.position.addScaledVector(right, -dpx * panScale);
+    camera.position.addScaledVector(up, dpy * panScale);
+  };
 
   canvas.addEventListener('touchstart', (e) => {
     if (e.touches.length === 1) {
@@ -1310,25 +1316,21 @@ function bindTouchControls() {
     } else if (e.touches.length >= 2) {
       mode = 2;
       lastDist = dist(e.touches[0], e.touches[1]);
-      lmx = midX(e.touches[0], e.touches[1]);
-      lmy = midY(e.touches[0], e.touches[1]);
     }
     e.preventDefault();
   }, { passive: false });
 
   canvas.addEventListener('touchmove', (e) => {
     if (mode === 1 && e.touches.length === 1) {
+      // 单指平移
       const t = e.touches[0];
       const dx = t.clientX - lx, dy = t.clientY - ly;
       lx = t.clientX; ly = t.clientY;
-      yaw -= dx * 0.005;
-      pitch -= dy * 0.005;
-      updateCameraRotation();
+      panBy(dx, dy);
     } else if (mode === 2 && e.touches.length >= 2) {
+      // 双指捏合缩放
       const a = e.touches[0], b = e.touches[1];
       const d = dist(a, b);
-      const mx = midX(a, b), my = midY(a, b);
-      // 捏合缩放
       const dd = d - lastDist;
       if (Math.abs(dd) > 0.3) {
         if (projectionMode === 'ortho') {
@@ -1342,13 +1344,6 @@ function bindTouchControls() {
         }
         lastDist = d;
       }
-      // 双指平移
-      const pmx = mx - lmx, pmy = my - lmy;
-      lmx = mx; lmy = my;
-      const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
-      const up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
-      camera.position.addScaledVector(right, -pmx * panScale);
-      camera.position.addScaledVector(up, pmy * panScale);
     }
     e.preventDefault();
   }, { passive: false });
@@ -2571,7 +2566,7 @@ function heatColorRGB(t) {
 //   4) 点位坐标一律走 ueToLocal，与点云使用完全相同的映射（含左右镜像），
 //      保证两种显示方式的位置严格一致。
 //   5) 平面紧贴 2D 参考图上方并关闭深度测试，俯视时与小地图严格重合、不被建筑遮挡。
-let displayMode = 'points';   // 'points' | 'heatmap'
+let displayMode = 'heatmap';   // 'points' | 'heatmap'（玩家端默认热力图）
 let heatPlane = null;         // 承载热力图贴图的平面
 // 热力图的扩散范围（真实世界距离，cm）。按此值换算成像素半径，
 // 保证不同尺寸的地图扩散程度在物理上一致；不对外暴露为可调参数。
