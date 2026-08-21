@@ -1,0 +1,201 @@
+/* ================= 手机竖屏 H5 版样式（叠加在 style.css 之上，仅覆盖布局） ================= */
+
+html, body.mobile {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* 画布禁用浏览器默认手势，交给触摸控制处理 */
+body.mobile #canvas3d {
+  touch-action: none;
+}
+
+/* ---------- 顶栏 ---------- */
+body.mobile .m-topbar {
+  height: calc(48px + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 14px 0;
+  gap: 10px;
+}
+body.mobile .brand-title { font-size: 16px; letter-spacing: 1px; }
+body.mobile .brand-sub { display: none; }
+body.mobile .topbar-map {
+  margin-left: auto;
+  padding-left: 0;
+  border-left: none;
+}
+body.mobile .map-tab { padding: 6px 12px; font-size: 13px; }
+
+/* 视图区顶部对齐新顶栏高度 */
+body.mobile .view3d {
+  top: calc(48px + env(safe-area-inset-top, 0px));
+}
+
+/* ---------- 悬浮操作按钮（右上） ---------- */
+.m-fabs {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 22;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.m-proj {
+  display: inline-flex;
+  background: rgba(12, 15, 19, 0.82);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  backdrop-filter: blur(6px);
+}
+.m-proj .view-tab {
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.m-proj .view-tab.active {
+  color: #0b0f14;
+  background: var(--accent);
+  font-weight: 600;
+}
+.m-fab {
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text);
+  background: rgba(12, 15, 19, 0.82);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+.m-fab:active { background: rgba(245, 197, 66, 0.2); }
+
+/* ---------- 首次操作提示卡 ---------- */
+.m-tips {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  z-index: 40;
+  width: min(80vw, 300px);
+  padding: 20px 22px;
+  background: rgba(12, 15, 19, 0.94);
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+.m-tips.hidden { display: none; }
+.m-tips-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+}
+.m-tips-line {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin: 8px 0;
+}
+.m-tips-line b { color: var(--text); font-weight: 600; }
+.m-tips-close {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0b0f14;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ---------- 数据内容 → 底部抽屉 ---------- */
+body.mobile .heatmap-panel.m-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  width: auto;
+  max-height: 64vh;
+  padding: 0;
+  border: none;
+  border-top: 1px solid var(--accent);
+  border-radius: 16px 16px 0 0;
+  background: rgba(12, 15, 19, 0.96);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
+  overflow: visible;
+  transform: translateY(0);
+  transition: transform 0.28s ease;
+  z-index: 28;
+}
+body.mobile .heatmap-panel.m-sheet.collapsed {
+  transform: translateY(calc(100% - 48px - env(safe-area-inset-bottom, 0px)));
+}
+.m-sheet-handle {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  cursor: pointer;
+}
+.m-sheet-grip {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--text-dim);
+  opacity: 0.5;
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  transform: translateX(-50%);
+}
+.m-sheet-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+.m-sheet-caret {
+  margin-left: auto;
+  color: var(--text-dim);
+  font-size: 16px;
+  transition: transform 0.28s ease;
+}
+.m-sheet.collapsed .m-sheet-caret { transform: rotate(180deg); }
+.m-sheet-body {
+  padding: 4px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  max-height: calc(64vh - 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 抽屉内控件放大，便于触摸 */
+body.mobile .heatmap-panel-label { width: 68px; font-size: 13px; }
+body.mobile .mode-btn { padding: 7px 14px; font-size: 13px; }
+body.mobile .data-item { padding: 8px 6px; }
+body.mobile .data-item-name { font-size: 14px; }
+body.mobile .data-group-name { font-size: 14px; }
+body.mobile .heatmap-slider { height: 22px; }
+body.mobile .heatmap-select { font-size: 14px; padding: 4px 6px; }
+
+/* 顶栏隐藏桌面端的导航/投影（若样式残留） */
+body.mobile .nav-link { display: none; }

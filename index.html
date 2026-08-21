@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0b0f14" />
+  <title>来财行动 · 关卡数据</title>
+  <link rel="stylesheet" href="style.css?v=h5-1" />
+  <link rel="stylesheet" href="mobile.css?v=h5-1" />
+</head>
+<body class="mobile">
+  <div class="app">
+    <!-- 顶栏：品牌 + 地图切换 -->
+    <header class="topbar m-topbar">
+      <div class="brand">
+        <span class="brand-logo">◆</span>
+        <span class="brand-title">来财行动</span>
+      </div>
+      <div class="topbar-map" id="mapSwitch">
+        <button class="map-tab active" data-map="steel">钢铁厂</button>
+        <button class="map-tab" data-map="electronic">电子城</button>
+      </div>
+    </header>
+
+    <!-- 3D 视图（唯一视图） -->
+    <main class="view3d" id="view3d">
+      <canvas id="canvas3d"></canvas>
+      <div class="loader3d" id="loader3d">
+        <div class="loader3d-spinner"></div>
+        <div class="loader3d-text" id="loader3dText">正在加载 3D 模型…</div>
+      </div>
+
+      <!-- 悬浮操作：复位 / 视角切换 -->
+      <div class="m-fabs">
+        <div class="m-proj" id="projSwitch">
+          <button class="view-tab active" data-proj="persp" id="tabPersp" title="透视（近大远小）">透视</button>
+          <button class="view-tab" data-proj="ortho" id="tabOrtho" title="正交俯视">俯视</button>
+        </div>
+        <button class="m-fab" id="mBtnReset" title="复位视角">复位</button>
+      </div>
+
+      <!-- 首次操作提示 -->
+      <div class="m-tips" id="mTips">
+        <div class="m-tips-title">操作说明</div>
+        <div class="m-tips-line"><b>单指拖动</b> — 旋转视角</div>
+        <div class="m-tips-line"><b>双指捏合</b> — 放大 / 缩小</div>
+        <div class="m-tips-line"><b>双指拖动</b> — 平移画面</div>
+        <button class="m-tips-close" id="mTipsClose">开始查看</button>
+      </div>
+
+      <!-- 数据内容底部抽屉（id/class 与 view3d.js 绑定保持一致） -->
+      <div class="heatmap-panel m-sheet collapsed" id="heatmapPanel">
+        <div class="m-sheet-handle" id="mSheetHandle">
+          <span class="m-sheet-grip"></span>
+          <span class="m-sheet-title">数据内容</span>
+          <span class="m-sheet-caret">▴</span>
+        </div>
+        <div class="m-sheet-body">
+          <div class="heatmap-panel-row">
+            <span class="heatmap-panel-label">地图筛选</span>
+            <select class="heatmap-select" id="heatMapFilter">
+              <option value="all">全部</option>
+            </select>
+          </div>
+          <div class="heatmap-panel-row" id="dotSizeRow">
+            <span class="heatmap-panel-label">点位大小</span>
+            <input type="range" class="heatmap-slider" id="heatDotSize" min="0.00001" max="0.003" step="0.00001" value="0.001">
+            <span class="heatmap-val" id="heatDotSizeVal">0.00100</span>
+          </div>
+          <div class="heatmap-panel-row">
+            <span class="heatmap-panel-label">显示方式</span>
+            <div class="mode-switch" id="dataModeSwitch">
+              <button class="mode-btn active" data-mode="points">点云</button>
+              <button class="mode-btn" data-mode="heatmap">热力图</button>
+            </div>
+          </div>
+
+          <!-- 数据时间轴 -->
+          <div class="heatmap-subtitle">数据时间轴</div>
+          <div class="heatmap-panel-row">
+            <span class="heatmap-panel-label">按照时间显示</span>
+            <div class="mode-switch" id="timeEnableSwitch">
+              <button class="mode-btn active" data-on="1">是</button>
+              <button class="mode-btn" data-on="0">否</button>
+            </div>
+          </div>
+          <div class="heatmap-panel-row" id="timeUnitRow">
+            <span class="heatmap-panel-label">时间单位</span>
+            <select class="heatmap-select" id="timeUnitSel">
+              <option value="21600">6小时</option>
+              <option value="43200" selected>12小时</option>
+              <option value="86400">1天</option>
+            </select>
+          </div>
+          <div class="heatmap-panel-row time-axis-cur">
+            <span class="time-axis-label" id="timeAxisLabel">--</span>
+          </div>
+          <div class="heatmap-panel-row time-axis-row" id="timeAxisRow">
+            <div class="time-axis-track">
+              <input type="range" class="heatmap-slider time-axis-slider" id="timeAxisRange" min="0" max="1000" step="1" value="0">
+            </div>
+          </div>
+
+          <!-- 数据分类树 -->
+          <div class="data-tree" id="dataTree">
+            <div class="data-group" data-group="scene">
+              <div class="data-group-head">
+                <span class="data-caret">▾</span>
+                <span class="data-group-name">场景点位</span>
+              </div>
+              <div class="data-group-body" id="sceneList"></div>
+            </div>
+            <div class="data-group" data-group="behavior">
+              <div class="data-group-head">
+                <span class="data-caret">▾</span>
+                <span class="data-group-name">玩家行为</span>
+              </div>
+              <div class="data-group-body" id="behaviorList"></div>
+            </div>
+            <div class="data-group" data-group="other">
+              <div class="data-group-head">
+                <span class="data-caret">▾</span>
+                <span class="data-group-name">其他数据</span>
+              </div>
+              <div class="data-group-body" id="otherList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three/three.module.js",
+      "three/addons/": "./vendor/three/"
+    }
+  }
+  </script>
+  <script src="mobile.js?v=h5-1"></script>
+  <script src="heatdata.js?v=h5-1"></script>
+  <script src="scenepoints.js?v=h5-1"></script>
+  <script src="snapshotdata.js?v=h5-1"></script>
+  <script type="module" src="view3d.js?v=h5-1"></script>
+</body>
+</html>

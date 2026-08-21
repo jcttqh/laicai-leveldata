@@ -1,0 +1,912 @@
+:root {
+  --bg-deep: #0c0f13;
+  --bg-panel: rgba(18, 22, 28, 0.92);
+  --bg-panel-solid: #141a21;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #d8dee6;
+  --text-dim: #8a94a0;
+  --accent: #f5c542;
+  --accent-glow: rgba(245, 197, 66, 0.5);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text);
+  user-select: none;
+}
+
+.app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* ================= 顶部标题栏 ================= */
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  background: linear-gradient(180deg, rgba(12, 15, 19, 0.95), rgba(12, 15, 19, 0.6));
+  border-bottom: 1px solid var(--border);
+  z-index: 30;
+  backdrop-filter: blur(6px);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.brand-logo {
+  color: var(--accent);
+  font-size: 18px;
+  transform: translateY(1px);
+}
+
+.brand-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.brand-sub {
+  font-size: 15px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.topbar-map {
+  margin-left: 24px;
+  padding-left: 24px;
+  border-left: 1px solid var(--border);
+  display: flex;
+  gap: 4px;
+}
+
+/* 地图切换按钮（钢铁厂 / 电子城） */
+.map-tab {
+  padding: 6px 14px;
+  font-size: 14px;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.15s ease;
+}
+
+.map-tab:hover {
+  color: var(--text);
+}
+
+.map-tab.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* 视图切换 */
+.view-switch {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* 当顶栏出现两个 .view-switch（投影切换 + 视图切换）时，
+   只让第一个吃掉左侧剩余空间；第二个紧贴其右，避免被撑到最右。 */
+.view-switch + .view-switch {
+  margin-left: 8px;
+}
+
+.view-tab {
+  padding: 6px 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.15s ease;
+}
+
+.view-tab:hover {
+  color: var(--text);
+}
+
+.view-tab:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  color: var(--text-dim);
+}
+
+.view-tab:disabled:hover {
+  color: var(--text-dim);
+}
+
+.view-tab.active {
+  color: #0c0f13;
+  background: var(--accent);
+  font-weight: 600;
+}
+
+/* 顶栏右侧：跳转日志转表工具 */
+.nav-link {
+  margin-left: 12px;
+  padding: 7px 14px;
+  font-size: 13px;
+  color: var(--text-dim);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.nav-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ================= 3D 视图（唯一视图模式）================= */
+.view3d {
+  position: absolute;
+  top: 52px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  background: radial-gradient(ellipse at center, #1a2028 0%, #070a0d 85%);
+}
+
+.view3d.visible {
+  display: block;
+}
+
+#canvas3d {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.loader3d {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(7, 10, 13, 0.85);
+  z-index: 5;
+  transition: opacity 0.4s ease;
+}
+
+.loader3d.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader3d-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(245, 197, 66, 0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loader3d-text {
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.hint-3d {
+  left: auto;
+  right: 20px;
+  transform: none;
+}
+
+/* ===== 参考图操作面板（选中参考图时显示）===== */
+.ref-panel {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  z-index: 25;
+  min-width: 220px;
+}
+
+.ref-panel[hidden] {
+  display: none;
+}
+
+.ref-panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.ref-panel-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ref-panel-label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.ref-panel-btns {
+  display: flex;
+  gap: 8px;
+}
+
+/* 复选框：显示 2D 参考图 */
+.ref-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+/* 透明度：滑块 + 数值输入 */
+.ref-panel-opacity {
+  gap: 8px;
+}
+
+.ref-slider {
+  flex: 1;
+  min-width: 60px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.ref-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg-panel);
+}
+
+.ref-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg-panel);
+}
+
+.ref-num-input {
+  width: 48px;
+  padding: 3px 6px;
+  font-size: 12px;
+  color: var(--text-strong, #e8ecf3);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.ref-num-input:focus {
+  border-color: var(--accent);
+}
+
+/* ===== 热力图调整面板（左下角，位于 3D 模型面板正上方）===== */
+/* 数据内容面板（左上角，含可折叠的数据分类树） */
+.heatmap-panel {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  z-index: 26;
+  width: 260px;
+  /* 内容较多时可滚动，避免遮住下方的 3D 模型 / 操控速度面板 */
+  max-height: calc(100vh - 320px);
+  overflow-y: auto;
+}
+
+.heatmap-panel[hidden] { display: none; }
+
+.heatmap-panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.heatmap-panel-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heatmap-panel-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.heatmap-slider {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.heatmap-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg-panel);
+}
+
+.heatmap-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg-panel);
+}
+
+.heatmap-val {
+  font-size: 11px;
+  color: var(--text-strong, #e8ecf3);
+  width: 60px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* 地图筛选下拉 */
+.heatmap-select {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--text-strong, #e8ecf3);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+}
+
+.heatmap-select:focus {
+  border-color: var(--accent);
+}
+
+.heatmap-select option {
+  background: #161b22;
+  color: #e8ecf3;
+}
+
+/* 点云 / 热力图 显示方式切换 */
+.mode-switch {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+  padding: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 3px 0;
+  font-size: 11px;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-btn:hover {
+  color: var(--text, #e8ecf3);
+}
+
+.mode-btn.active {
+  color: #0c0f13;
+  background: var(--accent);
+  font-weight: 600;
+}
+
+/* ===== 数据时间轴模块 ===== */
+.heatmap-subtitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 当前时间窗起点显示（居中、加大） */
+.time-axis-cur {
+  justify-content: center;
+}
+
+.time-axis-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-strong, #e8ecf3);
+  letter-spacing: 0.3px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 时间轴滑块：轨道带刻度线 */
+.time-axis-row {
+  padding: 0 2px 2px;
+}
+
+.time-axis-track {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding-top: 6px;
+}
+
+/* 刻度线：等距竖线，衬在滑块后面 */
+.time-axis-track::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 8px;
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.28) 0,
+    rgba(255, 255, 255, 0.28) 1px,
+    transparent 1px,
+    transparent var(--tick-gap, 5%)
+  );
+  pointer-events: none;
+}
+
+.time-axis-slider {
+  width: 100%;
+}
+
+/* 「按照时间显示」关闭时，时间单位/时间轴整体置灰禁用 */
+.time-axis-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ===== 数据分类树（场景点位 / 玩家行为）===== */
+.data-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 8px;
+}
+
+.data-group-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 4px;
+}
+
+.data-group-head:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* 折叠三角：收起时旋转 -90° */
+.data-caret {
+  font-size: 10px;
+  color: var(--accent);
+  width: 12px;
+  text-align: center;
+  transition: transform 0.15s ease;
+}
+
+.data-group.collapsed .data-caret {
+  transform: rotate(-90deg);
+}
+
+.data-group.collapsed .data-group-body {
+  display: none;
+}
+
+.data-group-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+
+.data-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 16px;
+}
+
+/* 二级项目：色块 + 名称（点名称切显隐，点色块改颜色） */
+.data-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 4px;
+  border-radius: 4px;
+}
+
+.data-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.data-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  position: relative;
+}
+
+.data-color:hover {
+  border-color: #fff;
+}
+
+/* 隐藏原生 color input，用色块承载点击 */
+.data-color input[type="color"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+/* 场景点位用 icon 缩略图代替色块 */
+.data-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.data-item-name {
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-item-name:hover {
+  color: var(--text, #e8ecf3);
+}
+
+/* 已开启：名称高亮 */
+.data-item.active .data-item-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* 规则待补充：整行置灰不可点 */
+.data-item.disabled {
+  opacity: 0.4;
+}
+
+.data-item.disabled .data-item-name,
+.data-item.disabled .data-color {
+  cursor: not-allowed;
+}
+
+.data-item-count {
+  font-size: 10px;
+  color: var(--text-dim);
+  opacity: 0.7;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== 3D 模型调整面板（左下角，位于操控速度面板正上方）===== */
+.model-panel {
+  position: absolute;
+  right: 20px;
+  bottom: 168px; /* 操控速度面板高度 + 一点间距，避免重叠 */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  z-index: 25;
+  width: 260px;
+}
+
+.model-panel[hidden] { display: none; }
+
+.model-panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.model-panel-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.model-panel-offset {
+  justify-content: space-between;
+}
+
+/* 模型透明度行：标签 + 滑块 + 数值输入 */
+.model-panel-opacity {
+  gap: 8px;
+}
+
+.model-panel-reset {
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.model-btn {
+  flex: 1;
+  padding: 6px 4px;
+  font-size: 12px;
+  color: var(--text-strong, #e8ecf3);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.model-btn:hover {
+  background: rgba(77, 210, 255, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.model-btn:active {
+  background: rgba(77, 210, 255, 0.3);
+}
+
+.model-btn.model-btn-ghost {
+  flex: 0 0 auto;
+  padding: 4px 12px;
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.model-offset-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  width: 50px;
+}
+
+.model-offset-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--text-strong, #e8ecf3);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.model-offset-input:focus {
+  border-color: var(--accent);
+}
+
+/* ===== 操控速度面板（3D 视图左下角）===== */
+.speed-panel {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  z-index: 25;
+}
+
+.speed-panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.speed-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.speed-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  width: 28px;
+  flex: none;
+}
+
+.speed-slider {
+  width: 120px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.speed-val {
+  font-size: 12px;
+  color: var(--text);
+  width: 36px;
+  text-align: right;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== 玩家数据标签（3D）===== */
+/* CSS2DRenderer 生成的标签图层：铺满 3D 视图、不拦截鼠标 */
+.label3d-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.pd-label {
+  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #e8edf3;
+  background: rgba(12, 15, 19, 0.82);
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 4px 8px;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+}
+
+.pd-label .pd-title {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.pd-label .pd-meta {
+  color: #9aa4b0;
+  font-size: 10px;
+}
+
+.pd-label .pd-states {
+  color: #bcd0e6;
+  font-size: 10px;
+  white-space: normal;
+  max-width: 220px;
+}
+
+.pd-label.pd-chest { border-left-color: #f5c542; }
+.pd-label.pd-chest .pd-title { color: #f5c542; }
+.pd-label.pd-jump  { border-left-color: #4dd2ff; }
+.pd-label.pd-jump  .pd-title { color: #4dd2ff; }
+.pd-label.pd-snap  { border-left-color: #4dff88; }
+.pd-label.pd-snap  .pd-title { color: #4dff88; }
+.pd-label.pd-abn   { border-left-color: #ff5d6c; }
+.pd-label.pd-abn   .pd-title { color: #ff5d6c; }
+
+/* ================= 底部提示 ================= */
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--text-dim);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px 14px;
+  border-radius: 16px;
+  z-index: 15;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
