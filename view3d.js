@@ -2925,26 +2925,35 @@ function buildDotsGroup(raw, color, outPoints) {
     world[i] = ueToLocal({ x: p[0], y: p[1], z: p[2] }); // 已直接返回 three 世界坐标（对齐 2D 小地图）
   }
 
-  // 2) InstancedMesh 渲染散点小球（坐标空间：UE，Z 为高度轴）
-  // 半径基准取「当前地图的 orthoWidth」——与具体类别的数据分布无关，
-  // 保证所有类别的光球大小完全一致（早期用各自点云跨度会导致大小不一）。
-  // 由「数据内容」面板的滑块或控制台 dotSize() 调整，范围 0.00001 ~ 0.003。
+  // 2) THREE.Points 点云渲染散点（坐标空间：UE，Z 为高度轴）
+  //    每个数据点只是一个精灵（1 个顶点），相比 InstancedMesh 球（每球数百三角）
+  //    GPU/内存占用极低，十几万点在移动端（含 iOS）也能流畅渲染。
+  //    点大小基准取「当前地图 orthoWidth」，保证各类别大小一致；面板滑块/ dotSize() 可调。
   const dot = dotRadius();
-  const sphereGeo = new THREE.SphereGeometry(dot, 16, 12);
-  const sphereMat = new THREE.MeshBasicMaterial({ color: color, toneMapped: false });
-  const inst = new THREE.InstancedMesh(sphereGeo, sphereMat, world.length);
-  const mtx = new THREE.Matrix4();
-  const lift = dot; // 沿 UE Z 抬起半径高度，避免和地面/参考图 Z-fighting
+  const lift = dot; // 沿 UE Z 抬起，避免与地面/参考图 Z-fighting
+  const posArr = new Float32Array(world.length * 3);
   for (let i = 0; i < world.length; i++) {
     const v = world[i];
-    mtx.makeTranslation(v.x, v.y, v.z + lift);
-    inst.setMatrixAt(i, mtx);
+    posArr[i * 3] = v.x;
+    posArr[i * 3 + 1] = v.y;
+    posArr[i * 3 + 2] = v.z + lift;
   }
-  inst.instanceMatrix.needsUpdate = true;
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+  geo.computeBoundingSphere();
+  const mat = new THREE.PointsMaterial({
+    color: color,
+    size: dot * 2.2,           // 直径，约等于原球直径
+    map: getPlayerDotTexture(),
+    sizeAttenuation: true,      // 近大远小，随相机距离缩放
+    transparent: true,
+    alphaTest: 0.4,             // 圆形裁剪（去掉贴图透明角）
+    depthWrite: true,
+    toneMapped: false,
+  });
+  const inst = new THREE.Points(geo, mat);
   inst.renderOrder = 990;
-  // InstancedMesh 默认用「基础球几何在原点的包围球」做视锥剔除，不会自动覆盖所有实例；
-  // 当相机聚焦到偏离 UE 原点的数据簇、且屏幕视锥较窄（iOS 竖屏）时，会整组被误剔除导致
-  // 一个点都不显示（安卓因宽高比不同恰好未被剔除）。这里直接关闭剔除，确保始终渲染。
+  // 保险起见关闭视锥剔除：iOS 竖屏窄视锥下，避免因包围球边界判断误差导致整组不显示
   inst.frustumCulled = false;
 
   const group = new THREE.Group();
@@ -2974,7 +2983,7 @@ function disposeGroup(g) {
   };
   g.traverse((o) => {
     if (o.isSprite) disposeMat(o.material);
-    if (o.isMesh || o.isInstancedMesh) {
+    if (o.isMesh || o.isInstancedMesh || o.isPoints) {
       if (o.geometry) o.geometry.dispose();
       disposeMat(o.material);
     }
@@ -3026,7 +3035,7 @@ function setBehaviorColor(key, hex) {
   // 已构建则直接改材质颜色，无需重建几何
   if (st.group) {
     st.group.traverse((o) => {
-      if (o.isInstancedMesh && o.material) o.material.color.set(hex);
+      if ((o.isInstancedMesh || o.isPoints) && o.material) o.material.color.set(hex);
     });
   }
 }
